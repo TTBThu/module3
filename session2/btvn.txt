@@ -1,0 +1,68 @@
+-- 1. Báo cáo tổng doanh thu từng đơn hàng
+SELECT OrderID, TotalAmount
+FROM Orders;
+
+-- 2. Báo cáo số lượng sản phẩm đã bán theo danh mục
+SELECT c.CategoryName, COUNT(od.ProductID) AS SoldQuantity
+FROM Categories c
+JOIN Products p ON c.CategoryID = p.CategoryID
+JOIN OrderDetails od ON p.ProductID = od.ProductID
+GROUP BY c.CategoryName;
+
+-- 3. Báo cáo danh sách khách hàng và số lượng đơn hàng mỗi khách hàng đã đặt
+SELECT c.CustomerID, c.FullName, COUNT(o.OrderID) AS OrderCount
+FROM Customers c
+LEFT JOIN Orders o ON c.CustomerID = o.CustomerID
+GROUP BY c.CustomerID;
+
+-- 4. Báo cáo tỷ lệ đơn hàng đã giao thành công
+SELECT 
+    (COUNT(CASE WHEN Status = 'Delivered' THEN 1 END) / COUNT(*)) * 100 AS DeliverySuccessRate
+FROM Orders;
+
+-- 5. Báo cáo đánh giá sản phẩm và điểm đánh giá trung bình cho mỗi sản phẩm
+SELECT 
+    p.ProductID,
+    p.ProductName,
+    AVG(r.Rating) AS AverageRating
+FROM Products p
+LEFT JOIN Reviews r ON p.ProductID = r.ProductID
+GROUP BY p.ProductID;
+
+-- 6. Liệt kê các sản phẩm được đặt hàng nhiều nhất
+SELECT 
+    p.ProductID,
+    p.ProductName,
+    COUNT(od.ProductID) AS OrderCount
+FROM Products p
+LEFT JOIN OrderDetails od ON p.ProductID = od.ProductID
+GROUP BY p.ProductID
+ORDER BY OrderCount DESC;
+
+-- 7. Tìm kiếm sản phẩm dựa trên mức đánh giá trung bình
+SELECT 
+    p.ProductID,
+    p.ProductName,
+    AVG(r.Rating) AS AverageRating
+FROM Products p
+LEFT JOIN Reviews r ON p.ProductID = r.ProductID
+WHERE AVG(r.Rating) >= 4.0
+GROUP BY p.ProductID;
+
+-- 8. Tìm khách hàng có đơn hàng có giá trị cao nhất
+SELECT 
+    c.CustomerID,
+    c.FullName,
+    MAX(o.TotalAmount) AS MaxOrderAmount
+FROM Customers c
+JOIN Orders o ON c.CustomerID = o.CustomerID
+GROUP BY c.CustomerID
+ORDER BY MaxOrderAmount DESC
+LIMIT 1;
+
+-- 9. Tổng doanh thu từng tháng trong năm
+SELECT 
+    MONTH(OrderDate) AS Month,
+    SUM(TotalAmount) AS MonthlyRevenue
+FROM Orders
+GROUP BY MONTH(OrderDate);
